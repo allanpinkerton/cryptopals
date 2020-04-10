@@ -16,4 +16,5 @@ func main() {
 	result := hex.EncodeToString(arr1)
 
 	fmt.Println(result)
+	fmt.Println("ASCII is:", string(arr1))
 }
