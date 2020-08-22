@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"strings"
 )
 
 func getEngishFrequencyMap() map[rune]float32 {
@@ -45,11 +48,10 @@ func score(s string, frequencyMap map[rune]float32) float32 {
 	return total
 }
 
-func guessEncrypted(inputHex string) {
+func guessEncrypted(inputHex string, index int) {
 	frequencyMap := getEngishFrequencyMap()
 
 	var maxScore float32 = 0
-	var maxIndex int = 0
 	for i := 0; i < 256; i++ {
 		bsIn, _ := hex.DecodeString(inputHex)
 		for j, _ := range bsIn {
@@ -58,22 +60,29 @@ func guessEncrypted(inputHex string) {
 		s := score(string(bsIn), frequencyMap)
 		if s > maxScore {
 			maxScore = s
-			maxIndex = i
 		}
 		if s > 100.0 {
-			fmt.Printf("Score: %f\n", s)
+			fmt.Printf("Line %d Score: %f\n", index, s)
 			fmt.Printf("Byte being XORED%x\n", i)
 			fmt.Println("Guessed text is:", string(bsIn))
 			fmt.Println("=========================")
 		}
 	}
 
-	fmt.Printf("%f", maxScore)
-	fmt.Printf("%x", maxIndex)
+}
 
+func readDataIntoArray(filename string) []string {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	lines := strings.Split(string(content), "\n")
+	return lines
 }
 
 func main() {
-	inputHex := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-	guessEncrypted(inputHex)
+	lines := readDataIntoArray("/Users/jma/dev/cryptopals/assets/S1C4.data")
+	for i, _ := range lines {
+		guessEncrypted(lines[i], i)
+	}
 }
